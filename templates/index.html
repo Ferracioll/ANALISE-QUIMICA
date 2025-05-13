@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Classificador de Estruturas Químicas</title>
+</head>
+<body>
+    <h1>Envie uma Imagem de Estrutura Química</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <label for="imagem">Escolha uma imagem:</label>
+        <input type="file" id="imagem" name="imagem" accept="image/*" required><br><br>
+        
+        <button type="submit">Enviar Imagem</button>
+    </form>
+
+    <h2>Resultado</h2>
+    <div id="resultado">
+        <p>Aguardando a análise...</p>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            // Obter o arquivo da imagem
+            const imagem = document.getElementById('imagem').files[0];
+            
+            if (!imagem) {
+                alert("Por favor, selecione uma imagem.");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('imagem', imagem);
+
+            // Enviar a imagem para o servidor usando Fetch API
+            fetch('/identificar_estrutura', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Exibir o resultado da API
+                if (data.resultado) {
+                    document.getElementById('resultado').innerHTML = `<pre>${data.resultado}</pre>`;
+                } else if (data.erro) {
+                    document.getElementById('resultado').innerHTML = `<p style="color:red;">Erro: ${data.erro}</p>`;
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao enviar a imagem:', error);
+                document.getElementById('resultado').innerHTML = `<p style="color:red;">Erro ao enviar a imagem</p>`;
+            });
+        });
+    </script>
+</body>
+</html>
